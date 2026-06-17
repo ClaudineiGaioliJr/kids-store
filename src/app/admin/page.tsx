@@ -38,6 +38,7 @@ interface Pedido {
   id: string;
   codigo_pedido: number;
   cliente_nome: string;
+  cliente_cpf: string;
   cliente_whatsapp: string;
   cliente_email: string;
   tipo_entrega: string;
@@ -58,8 +59,8 @@ export default function AdminPage() {
   const [authLoading, setAuthLoading] = useState(true);
   const [loginError, setLoginError] = useState('');
 
-  // Dashboard Tabs: 'produtos' | 'novo-produto' | 'pedidos' | 'financeiro'
-  const [activeTab, setActiveTab] = useState<'produtos' | 'novo-produto' | 'pedidos' | 'financeiro'>('produtos');
+  // Dashboard Tabs: 'produtos' | 'novo-produto' | 'pedidos' | 'clientes' | 'financeiro'
+  const [activeTab, setActiveTab] = useState<'produtos' | 'novo-produto' | 'pedidos' | 'clientes' | 'financeiro'>('produtos');
 
   // Estado dos Produtos
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -86,6 +87,7 @@ export default function AdminPage() {
   const [updatingPedidoId, setUpdatingPedidoId] = useState<string | null>(null);
   const [newStatus, setNewStatus] = useState('');
   const [trackingCode, setTrackingCode] = useState('');
+  const [searchCliente, setSearchCliente] = useState('');
 
   // Carregar sessão auth
   useEffect(() => {
@@ -360,6 +362,58 @@ export default function AdminPage() {
 
   const lucroLiquidoTotal = totalFaturamento - totalGatewayTaxas - totalCMV;
 
+  // Extração e consolidação de Clientes Únicos
+  const listaClientes = React.useMemo(() => {
+    const clientesMap: { 
+      [cpf: string]: { 
+        nome: string; 
+        cpf: string; 
+        whatsapp: string; 
+        email: string; 
+        totalGasto: number; 
+        totalPedidos: number; 
+        ultimaCompra: string 
+      } 
+    } = {};
+
+    pedidos.forEach(p => {
+      const cpf = p.cliente_cpf ? p.cliente_cpf.replace(/\D/g, '') : 'sem-cpf';
+      const total = (p.status === 'pago' || p.status === 'enviado' || p.status === 'entregue') ? Number(p.total_pedido) : 0;
+
+      if (clientesMap[cpf]) {
+        clientesMap[cpf].totalPedidos += 1;
+        clientesMap[cpf].totalGasto += total;
+        if (new Date(p.created_at) > new Date(clientesMap[cpf].ultimaCompra)) {
+          clientesMap[cpf].ultimaCompra = p.created_at;
+        }
+      } else {
+        clientesMap[cpf] = {
+          nome: p.cliente_nome,
+          cpf: p.cliente_cpf,
+          whatsapp: p.cliente_whatsapp,
+          email: p.cliente_email || 'Não informado',
+          totalPedidos: 1,
+          totalGasto: total,
+          ultimaCompra: p.created_at
+        };
+      }
+    });
+
+    const lista = Object.values(clientesMap);
+    
+    if (searchCliente.trim() !== '') {
+      const q = searchCliente.toLowerCase();
+      return lista.filter(c => 
+        c.nome.toLowerCase().includes(q) || 
+        c.cpf.includes(q) || 
+        c.email.toLowerCase().includes(q) ||
+        c.whatsapp.includes(q)
+      );
+    }
+    
+    return lista.sort((a, b) => b.totalGasto - a.totalGasto);
+  }, [pedidos, searchCliente]);
+
   // Simulação de recebimento no formulário de cadastro
   const valorVendaNum = parseFloat(precoVenda) || 0;
   const valorCustoNum = parseFloat(precoCusto) || 0;
@@ -476,6 +530,12 @@ export default function AdminPage() {
             className={`py-3.5 px-2 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${activeTab === 'pedidos' ? 'border-rose-500 text-rose-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             Pedidos
+          </button>
+          <button 
+            onClick={() => setActiveTab('clientes')}
+            className={`py-3.5 px-2 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${activeTab === 'clientes' ? 'border-rose-500 text-rose-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+          >
+            Clientes
           </button>
           <button 
             onClick={() => setActiveTab('financeiro')}
@@ -998,6 +1058,77 @@ export default function AdminPage() {
                           </tr>
                         );
                       })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: LISTAGEM CLIENTES */}
+        {activeTab === 'clientes' && (
+          <div>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <h2 className="text-xl font-bold tracking-tight text-white">Base de Clientes</h2>
+              
+              {/* Barra de Busca de Clientes */}
+              <div className="w-full md:max-w-xs relative">
+                <input 
+                  type="text" 
+                  value={searchCliente}
+                  onChange={(e) => setSearchCliente(e.target.value)}
+                  placeholder="Buscar por nome, CPF ou e-mail..."
+                  className="w-full bg-slate-900 text-white pl-4 pr-10 py-2.5 rounded-xl border border-slate-800 focus:outline-hidden focus:border-rose-500 text-xs"
+                />
+              </div>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+              {listaClientes.length === 0 ? (
+                <div className="text-center py-12 text-slate-500 text-xs">
+                  Nenhum cliente cadastrado ou localizado na busca.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left text-slate-300">
+                    <thead className="text-[10px] uppercase font-bold text-slate-500 border-b border-slate-800">
+                      <tr>
+                        <th className="pb-3">Nome / E-mail</th>
+                        <th className="pb-3">CPF</th>
+                        <th className="pb-3">WhatsApp</th>
+                        <th className="pb-3 text-center">Pedidos Realizados</th>
+                        <th className="pb-3 text-center">Última Compra</th>
+                        <th className="pb-3 text-right">LTV (Total Gasto)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/50">
+                      {listaClientes.map((c, idx) => (
+                        <tr key={idx} className="hover:bg-slate-850/40">
+                          <td className="py-3.5">
+                            <span className="font-bold text-white block">{c.nome}</span>
+                            <span className="text-slate-500 text-[10px] block mt-0.5">{c.email}</span>
+                          </td>
+                          <td className="py-3.5 font-mono text-slate-400">{c.cpf}</td>
+                          <td className="py-3.5">
+                            <a
+                              href={`https://wa.me/55${c.whatsapp.replace(/\D/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-2 py-1 rounded-md transition-all font-semibold"
+                            >
+                              <span>{c.whatsapp}</span>
+                            </a>
+                          </td>
+                          <td className="py-3.5 text-center font-bold text-slate-200">{c.totalPedidos}</td>
+                          <td className="py-3.5 text-center text-slate-400">
+                            {new Date(c.ultimaCompra).toLocaleDateString()}
+                          </td>
+                          <td className="py-3.5 text-right font-black text-emerald-400">
+                            R$ {c.totalGasto.toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
