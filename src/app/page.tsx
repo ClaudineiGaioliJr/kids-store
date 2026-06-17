@@ -73,6 +73,7 @@ export default function VitrinePage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [cart, setCart] = useState<{ produto: Produto; tamanho: string; quantidade: number }[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [dbLoading, setDbLoading] = useState(true);
 
   // Estados de cálculo de frete
@@ -293,6 +294,12 @@ export default function VitrinePage() {
 
           <div className="flex items-center gap-4">
             <button 
+              onClick={() => setIsAboutOpen(true)}
+              className="text-xs font-bold text-slate-500 hover:text-rose-500 transition-colors uppercase tracking-wider px-3 py-2 cursor-pointer"
+            >
+              Quem Somos
+            </button>
+            <button 
               onClick={() => setIsCartOpen(true)}
               className="relative p-2.5 bg-rose-50 text-rose-500 rounded-full hover:bg-rose-100 transition-all cursor-pointer"
             >
@@ -483,6 +490,12 @@ export default function VitrinePage() {
           </div>
 
           <div className="flex flex-wrap gap-4 text-xs font-bold text-slate-400">
+            <button 
+              onClick={() => setIsAboutOpen(true)}
+              className="hover:text-rose-500 flex items-center gap-1.5 bg-transparent border-0 cursor-pointer p-0 font-bold text-xs"
+            >
+              <ArrowRight className="w-3.5 h-3.5" /> Quem Somos
+            </button>
             <a href="mailto:contato@minicloset.com.br" className="hover:text-rose-500 flex items-center gap-1.5">
               <ArrowRight className="w-3.5 h-3.5" /> E-mail
             </a>
@@ -944,6 +957,95 @@ export default function VitrinePage() {
                 </div>
               )}
 
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Slide-over "Quem Somos" */}
+      {isAboutOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity" onClick={() => setIsAboutOpen(false)} />
+          <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+            <div className="w-screen max-w-md bg-white/95 backdrop-blur-md border-l border-slate-100 flex flex-col shadow-2xl rounded-l-3xl overflow-hidden">
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-rose-500">Conceito e Carinho</span>
+                  <h2 className="text-xl font-black text-slate-950">Quem Somos</h2>
+                </div>
+                <button
+                  onClick={() => setIsAboutOpen(false)}
+                  className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded-full transition-all cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                <div className="bg-rose-50/50 border border-rose-100/50 rounded-2xl p-5 text-center">
+                  <span className="text-3xl">🍼</span>
+                  <h3 className="font-extrabold text-slate-900 mt-2">Mini Closet</h3>
+                  <p className="text-xs text-rose-500 font-bold mt-0.5">Moda Infantil Cuidada com Amor</p>
+                </div>
+
+                <div className="space-y-4 text-sm text-slate-600 leading-relaxed">
+                  <p>
+                    A <strong>Mini Closet</strong> nasceu de um sonho genuíno: vestir bebês e crianças com o máximo de conforto, sem abrir mão do estilo e do design moderno.
+                  </p>
+                  <p>
+                    Sabemos que a infância é repleta de momentos inesquecíveis, descobertas e muitas brincadeiras. Por isso, nossa missão é oferecer peças de vestuário que acompanhem os pequenos em cada passo, garantindo total liberdade de movimento.
+                  </p>
+                  <p>
+                    Realizamos uma <strong>curadoria afetiva e minuciosa</strong>, escolhendo tecidos hipoalergênicos e de fibras naturais que respeitam a pele delicada das crianças. Cada costura, botão e acabamento é inspecionado para assegurar a melhor durabilidade.
+                  </p>
+                </div>
+
+                <div className="border-t border-slate-100 pt-6 space-y-4">
+                  <h4 className="font-extrabold text-xs text-slate-900 uppercase tracking-wider">Nossos Valores</h4>
+                  
+                  <div className="flex gap-3 items-start">
+                    <div className="p-2 bg-rose-50 text-rose-500 rounded-xl shrink-0">
+                      <Check className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-xs text-slate-900">Conforto Absoluto</h5>
+                      <p className="text-xs text-slate-500 mt-0.5">Modelagens que abraçam o corpo e tecidos macios que não incomodam.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 items-start">
+                    <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl shrink-0">
+                      <Check className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-xs text-slate-900">Qualidade Inabalável</h5>
+                      <p className="text-xs text-slate-500 mt-0.5">Peças resistentes ao desgaste do dia a dia e às lavagens frequentes.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 items-start">
+                    <div className="p-2 bg-amber-50 text-amber-500 rounded-xl shrink-0">
+                      <Check className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-xs text-slate-900">Curadoria Segura</h5>
+                      <p className="text-xs text-slate-500 mt-0.5">Foco em tecidos saudáveis para a pele sensível dos pequenos.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 border-t border-slate-100 bg-slate-50/50">
+                <a
+                  href="https://wa.me/5585994303939?text=Olá! Gostaria de conversar sobre a loja e os produtos."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-[#25D366] hover:bg-[#20ba56] text-white py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                >
+                  <MessageSquare className="w-4 h-4 fill-white text-[#25D366]" />
+                  Falar Conosco no WhatsApp
+                </a>
+              </div>
             </div>
           </div>
         </div>
