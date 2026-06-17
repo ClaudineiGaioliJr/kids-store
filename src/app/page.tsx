@@ -486,7 +486,7 @@ export default function VitrinePage() {
             <a href="mailto:contato@minicloset.com.br" className="hover:text-rose-500 flex items-center gap-1.5">
               <ArrowRight className="w-3.5 h-3.5" /> E-mail
             </a>
-            <a href="https://wa.me/5516999999999" target="_blank" rel="noreferrer" className="hover:text-rose-500 flex items-center gap-1.5">
+            <a href="https://wa.me/5585994303939" target="_blank" rel="noreferrer" className="hover:text-rose-500 flex items-center gap-1.5">
               <MessageSquare className="w-3.5 h-3.5 text-emerald-500" /> WhatsApp
             </a>
           </div>
@@ -951,7 +951,7 @@ export default function VitrinePage() {
 
       {/* Floating WhatsApp Support Button */}
       <a
-        href="https://wa.me/5516999999999?text=Olá! Gostaria de tirar algumas dúvidas sobre os produtos da Mini Closet."
+        href="https://wa.me/5585994303939?text=Olá! Gostaria de tirar algumas dúvidas sobre os produtos da Mini Closet."
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 bg-[#25D366] hover:bg-[#20ba56] text-white p-4 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center z-45 group"
